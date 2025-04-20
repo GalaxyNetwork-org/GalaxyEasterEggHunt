@@ -5,6 +5,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -133,11 +134,11 @@ public final class GalaxyEasterEggHunt extends JavaPlugin implements Listener {
 
     public int getTotalFindings(Player player) {
         int count = 0;
+        ConfigurationSection section = findingsConfig.getConfigurationSection(player.getName());
+        if (section == null) return 0;
 
-        for (String key : findingsConfig.getConfigurationSection(player.getName()).getKeys(false)) {
-            if (findingsConfig.getBoolean(player.getName() + "." + key, false)) {
-                count++;
-            }
+        for (String key : section.getKeys(false)) {
+            if (findingsConfig.getBoolean(player.getName() + "." + key, false)) count++;
         }
 
         return count;
