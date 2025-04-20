@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -22,6 +23,7 @@ public final class GalaxyEasterEggHunt extends JavaPlugin implements Listener {
     private File findingsFile;
     private FileConfiguration findingsConfig;
     HashMap<Player, Long> playerTimestamps = new HashMap<>();
+    private final PlaceholderAPIExpansion placeholderAPIExpansion = new PlaceholderAPIExpansion(this);
 
     @Override
     public void onEnable() {
@@ -36,6 +38,27 @@ public final class GalaxyEasterEggHunt extends JavaPlugin implements Listener {
             }
         }
         findingsConfig = YamlConfiguration.loadConfiguration(findingsFile);
+
+        placeholderAPIExpansion.register();
+    }
+
+    @Override
+    public void onDisable() {
+        placeholderAPIExpansion.unregister();
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        String path = player.getName();
+        if (!findingsConfig.contains(path)) {
+            findingsConfig.set(path, new HashMap<String, Object>());
+            try {
+                findingsConfig.save(findingsFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @EventHandler
@@ -76,6 +99,7 @@ public final class GalaxyEasterEggHunt extends JavaPlugin implements Listener {
                 player.sendMessage(miniMessage.deserialize("<red>You have already found that egg! (%s left)".formatted(12-totalFindings)));
                 return;
             }
+            totalFindings = totalFindings+1;
             player.sendMessage(miniMessage.deserialize("<color:#A48FD1><b>%s/12 eggs found, %s left to go!".formatted(totalFindings, 12-totalFindings)));
             if (totalFindings == 12) {
                 player.sendMessage(miniMessage.deserialize("<color:#D18FA4><b>Congrats! You now have the <gradient:#FBC2EB:#A6C1EE>BUNNY</gradient> tag!"));
@@ -111,7 +135,7 @@ public final class GalaxyEasterEggHunt extends JavaPlugin implements Listener {
         int count = 0;
 
         for (String key : findingsConfig.getConfigurationSection(player.getName()).getKeys(false)) {
-            if (findingsConfig.getBoolean(player.getName() + "." + key)) {
+            if (findingsConfig.getBoolean(player.getName() + "." + key, false)) {
                 count++;
             }
         }

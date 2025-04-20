@@ -2,3 +2,4 @@ name: GalaxyEasterEggHunt
 version: '${version}'
 main: xyz.lncvrt.galaxyEasterEggHunt.GalaxyEasterEggHunt
 api-version: '1.20'
+depend: ["PlaceholderAPI"]
